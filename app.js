@@ -3,7 +3,8 @@ const app = express();
 const path = require("path");
 const mongoose = require("mongoose");
 const Campground = require("./models/campground");
-const methodOverride = require("method-override");
+const methodOverride = require("method-override"); //to access method other than get, put in ejs
+const ejsMate = require("ejs-mate");
 
 mongoose
   .connect("mongodb://localhost:27017/yelp-camp")
@@ -15,15 +16,19 @@ mongoose
   });
 
 //middleware
+app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 app.get("/", (req, res) => {
   res.render("home");
 });
+//parse form data
 app.use(express.urlencoded({ extended: true }));
+//override post method in form to use PUT, DELETE...
 app.use(methodOverride("_method"));
 
+//CRUD
 //get all campgrounds
 app.get("/campgrounds", async (req, res) => {
   const campgrounds = await Campground.find({});
