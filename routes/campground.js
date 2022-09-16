@@ -4,6 +4,7 @@ const catchAsync = require("../utils/catchAsync");
 const ExpressError = require("../utils/ExpressError");
 const Campground = require("../models/campground");
 const { campgroundSchema } = require("../schemas");
+const { response } = require("express");
 
 //validate campground form from server side
 const validateCampground = (req, res, next) => {
@@ -35,6 +36,11 @@ router.get(
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id).populate("reviews");
+    //prevent campground from passing to the ejs template if not found
+    if (!campground) {
+      req.flash("error", "Cannot Find Campground!");
+      return res.redirect("/campgrounds");
+    }
     res.render("campgrounds/show", { campground });
   })
 );
@@ -46,6 +52,7 @@ router.post(
     // if (!req.body.campground) throw new ExpressError("Invalid Input", 400);
     const newCampground = new Campground(req.body.campground);
     await newCampground.save();
+    req.flash("success", "Successfully made a new Campground!");
     res.redirect(`/campgrounds/${newCampground._id}`);
   })
 );
@@ -55,6 +62,11 @@ router.get(
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id);
+    //prevent campground from passing to the ejs template if not found
+    if (!campground) {
+      req.flash("error", "Cannot Find Campground!");
+      return res.redirect("/campgrounds");
+    }
     res.render("campgrounds/edit", { campground });
   })
 );
@@ -66,6 +78,7 @@ router.put(
     const foundCampground = await Campground.findByIdAndUpdate(id, {
       ...req.body.campground,
     });
+    req.flash("success", "Successfully Updated Campground!");
     res.redirect(`/campgrounds/${foundCampground._id}`);
   })
 );
@@ -76,6 +89,7 @@ router.delete(
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const deleteCampground = await Campground.findByIdAndDelete(id);
+    req.flash("success", "Successfully Deleted campground!");
     res.redirect(`/campgrounds`);
   })
 );

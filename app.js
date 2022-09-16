@@ -7,7 +7,8 @@ const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
 const reviewRoute = require("./routes/reviews");
 const campgroundRoute = require("./routes/campground");
-
+const session = require("express-session");
+const flash = require("connect-flash");
 //connect to mongoDB
 mongoose
   .connect("mongodb://localhost:27017/yelp-camp")
@@ -26,6 +27,26 @@ app.use(express.urlencoded({ extended: true })); //parse form data
 app.use(methodOverride("_method")); //override post method in form to use PUT, DELETE...
 //Serve Static files/assets from public dir
 app.use(express.static(path.join(__dirname, "public")));
+
+const sessionConfig = {
+  secret: "thisshouldbeabettersecret",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+    expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  },
+};
+app.use(session(sessionConfig));
+app.use(flash());
+
+//middleware to retrieve messages from flash
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+});
 
 //Use Routes
 app.get("/", (req, res) => {
