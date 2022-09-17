@@ -9,6 +9,11 @@ const reviewRoute = require("./routes/reviews");
 const campgroundRoute = require("./routes/campground");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user");
+const usersRoute = require("./routes/users");
+
 //connect to mongoDB
 mongoose
   .connect("mongodb://localhost:27017/yelp-camp")
@@ -34,12 +39,19 @@ const sessionConfig = {
   saveUninitialized: true,
   cookie: {
     httpOnly: true,
-    expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+    expires: Date.now() + 1000 * 60 * 60 * 24 * 7, //cookie life span of 1 week
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
 };
-app.use(session(sessionConfig));
-app.use(flash());
+app.use(session(sessionConfig)); //set up session
+app.use(flash()); //use flash
+
+//Authentication using Passport js
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser()); // how to store the user in the session
+passport.deserializeUser(User.deserializeUser()); // how to unstore the user in the session
 
 //middleware to retrieve messages from flash
 app.use((req, res, next) => {
@@ -52,6 +64,7 @@ app.use((req, res, next) => {
 app.get("/", (req, res) => {
   res.render("home");
 });
+app.use("/", usersRoute);
 app.use("/campgrounds", campgroundRoute);
 app.use("/campgrounds/:id/reviews", reviewRoute);
 

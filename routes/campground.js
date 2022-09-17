@@ -5,6 +5,7 @@ const ExpressError = require("../utils/ExpressError");
 const Campground = require("../models/campground");
 const { campgroundSchema } = require("../schemas");
 const { response } = require("express");
+const { isLoggedIn } = require("../middleware");
 
 //validate campground form from server side
 const validateCampground = (req, res, next) => {
@@ -27,7 +28,7 @@ router.get(
   })
 );
 //serving a form to create new campground
-router.get("/new", (req, res) => {
+router.get("/new", isLoggedIn, (req, res) => {
   res.render("campgrounds/new");
 });
 //get ONE campgrounds
@@ -47,6 +48,7 @@ router.get(
 //create campground
 router.post(
   "/",
+  isLoggedIn,
   validateCampground,
   catchAsync(async (req, res) => {
     // if (!req.body.campground) throw new ExpressError("Invalid Input", 400);
@@ -59,6 +61,7 @@ router.post(
 //serving edit form
 router.get(
   "/:id/edit",
+  isLoggedIn,
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id);
@@ -73,6 +76,7 @@ router.get(
 //edit campground
 router.put(
   "/:id",
+  isLoggedIn,
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const foundCampground = await Campground.findByIdAndUpdate(id, {
@@ -86,6 +90,7 @@ router.put(
 //delete campground
 router.delete(
   "/:id",
+  isLoggedIn,
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const deleteCampground = await Campground.findByIdAndDelete(id);
