@@ -5,14 +5,15 @@ const mongoose = require("mongoose");
 const methodOverride = require("method-override"); //to access method other than get, put in ejs
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
-const reviewRoute = require("./routes/reviews");
-const campgroundRoute = require("./routes/campground");
 const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user");
+
 const usersRoute = require("./routes/users");
+const reviewRoute = require("./routes/reviews");
+const campgroundRoute = require("./routes/campground");
 
 //connect to mongoDB
 mongoose
@@ -55,19 +56,20 @@ passport.deserializeUser(User.deserializeUser()); // how to unstore the user in 
 
 //middleware to retrieve messages from flash
 app.use((req, res, next) => {
-  // console.log(req.session);
+  // console.log(req.session)
   res.locals.currentUser = req.user;
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
+  res.locals.success = req.flash('success');
+  res.locals.error = req.flash('error');
   next();
-});
+})
+
 //Use Routes
-app.get("/", (req, res) => {
-  res.render("home");
-});
 app.use("/", usersRoute);
 app.use("/campgrounds", campgroundRoute);
 app.use("/campgrounds/:id/reviews", reviewRoute);
+app.get("/", (req, res) => {
+  res.render("home");
+});
 
 //any routes that not match above routes redirect to 404 not found
 app.all("*", (req, res, next) => {

@@ -3,14 +3,11 @@ const passport = require("passport");
 const router = expres.Router();
 const User = require("../models/user");
 const catchAsync = require("../utils/catchAsync");
-const ExpressError = require("../utils/ExpressError");
 
 router.get("/register", (req, res) => {
   res.render("users/register");
 });
-router.post(
-  "/register",
-  catchAsync(async (req, res, next) => {
+router.post("/register", catchAsync(async (req, res, next) => {
     try {
       const { email, username, password } = req.body;
       const user = new User({ email, username });
@@ -31,19 +28,11 @@ router.post(
 router.get("/login", (req, res) => {
   res.render("users/login");
 });
-router.post(
-  "/login",
-  passport.authenticate("local", {
-    failureFlash: true,
-    failureRedirect: "/login",
-  }),
-  (req, res) => {
+router.post("/login",
+  passport.authenticate("local", {failureFlash: true, failureRedirect: "/login"}), (req, res) => {
     req.flash("success", "welcome back!");
-    const redirectUrl = "/campgrounds";
-    if (req.session.returnTo) {
-      redirectUrl = req.session.returnTo;
-      req.session.returnTo = null;
-    }
+    const redirectUrl = req.session.returnTo || '/campgrounds';
+    delete req.session.returnTo;
     res.redirect(redirectUrl);
   }
 );
