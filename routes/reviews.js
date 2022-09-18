@@ -3,7 +3,7 @@ const catchAsync = require("../utils/catchAsync");
 const Review = require("../models/review");
 const router = express.Router({ mergeParams: true }); //merge params from app.js
 const Campground = require("../models/campground");
-const { validateReview, isLoggedIn } = require('../middleware');
+const { validateReview, isLoggedIn, isReviewAuthor } = require('../middleware');
 
 
 
@@ -27,6 +27,7 @@ router.post("/",
 //remove review reference in the campground and remove the review itself
 router.delete("/:reviewId",
 isLoggedIn,
+isReviewAuthor, //middle to check if the author of the review
 catchAsync(async (req, res) => {
     const { id, reviewId } = req.params;
     //remove reference from campground and then remove from the reviews
