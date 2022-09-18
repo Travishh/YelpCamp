@@ -9,8 +9,13 @@
       </div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item text-muted"><%= campground.location %></li>
+        <li class="list-group-item">
+          Submitted By: <%= campground.author.username %>
+        </li>
         <li class="list-group-item">$<%= campground.price %>/night</li>
       </ul>
+
+      <% if(currentUser && campground.author.equals(currentUser._id)) {%>
       <div class="card-body">
         <a
           class="btn btn-warning card-link"
@@ -25,6 +30,8 @@
           <button class="btn btn-danger card-link">Delete</button>
         </form>
       </div>
+      <% } %>
+
       <div class="card-body text-center">
         <a href="/campgrounds" class="btn btn-info card-link"
           >All Campgrounds</a
@@ -33,6 +40,7 @@
     </div>
   </div>
   <div class="col-6">
+    <% if(currentUser) {%>
     <form
       action="/campgrounds/<%= campground._id  %>/reviews "
       method="post"
@@ -64,17 +72,19 @@
       </div>
       <button class="btn btn-success">Submit</button>
     </form>
-    <% for(let review of campground.reviews) {%>
+    <% } %> <% for(let review of campground.reviews) {%>
     <div class="mb-3 card">
       <div class="card-body">
         <h5 class="card-title">Rating: <%= review.rating %></h5>
         <p class="card-text">Review: <%= review.body %></p>
+        <% if(currentUser) {%> 
         <form
           action="/campgrounds/<%= campground._id %>/reviews/<%= review._id %>?_method=DELETE  "
           method="post"
         >
           <button class="btn btm-sm btn-danger">Delete</button>
         </form>
+        <% } %> 
       </div>
     </div>
     <% } %>

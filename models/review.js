@@ -4,6 +4,10 @@ const Schema = mongoose.Schema; // set mongoose.Schema to Schema to shorten the 
 const reviewSchema = new Schema({
   body: String,
   rating: Number,
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
 module.exports = mongoose.model("Review", reviewSchema);

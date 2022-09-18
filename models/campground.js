@@ -9,6 +9,11 @@ const CampgroundSchema = new Schema({
   price: Number,
   description: String,
   location: String,
+  author: {
+    //connect to user model to associate user with campground
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
   reviews: [
     //connect review model to campground
     {

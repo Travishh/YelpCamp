@@ -5,7 +5,8 @@ const ExpressError = require("../utils/ExpressError");
 const Campground = require("../models/campground");
 const { campgroundSchema } = require("../schemas");
 const { response } = require("express");
-const { isLoggedIn } = require("../middleware");
+const { isLoggedIn, isAuthor } = require("../middleware");
+const campground = require("../models/campground");
 
 //validate campground form from server side
 const validateCampground = (req, res, next) => {
@@ -32,19 +33,20 @@ router.get("/new", isLoggedIn, (req, res) => {
   res.render("campgrounds/new");
 });
 //get ONE campgrounds
-router.get(
-  "/:id",
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const campground = await Campground.findById(id).populate("reviews");
-    //prevent campground from passing to the ejs template if not found
-    if (!campground) {
-      req.flash("error", "Cannot Find Campground!");
-      return res.redirect("/campgrounds");
-    }
-    res.render("campgrounds/show", { campground });
-  })
-);
+router.get('/:id', catchAsync(async (req, res,) => {
+  const campground = await Campground.findById(req.params.id).populate({
+      path: 'reviews',
+      populate: {
+          path: 'author'
+      }
+  }).populate('author');
+  console.log(campground);
+  if (!campground) {
+      req.flash('error', 'Cannot find that campground!');
+      return res.redirect('/campgrounds');
+  }
+  res.render('campgrounds/show', { campground });
+}));
 //create campground
 router.post(
   "/",
@@ -53,6 +55,7 @@ router.post(
   catchAsync(async (req, res) => {
     // if (!req.body.campground) throw new ExpressError("Invalid Input", 400);
     const newCampground = new Campground(req.body.campground);
+    newCampground.author = req.user._id; //when campground is created set the author to whoever is logged in
     await newCampground.save();
     req.flash("success", "Successfully made a new Campground!");
     res.redirect(`/campgrounds/${newCampground._id}`);
