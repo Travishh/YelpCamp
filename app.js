@@ -1,3 +1,6 @@
+if(process.env.NODE_ENV !== "production"){ //if not in production, get the env variables
+    require('dotenv').config();
+}
 const express = require("express");
 const app = express();
 const path = require("path");
