@@ -2,6 +2,7 @@ const { ref } = require("joi");
 const mongoose = require("mongoose");
 const Review = require("./review");
 const Schema = mongoose.Schema;
+const opts = {toJSON: {virtuals: true}}; //include virtual when convert to json
 
 const ImageSchema = new Schema({
   url: String,
@@ -42,7 +43,13 @@ const CampgroundSchema = new Schema({
       ref: "Review",
     },
   ],
-});
+}, opts);
+
+CampgroundSchema.virtual('properties.popUpMarkup').get(function(){ 
+  //create a virtual, have a properties popUpMarkup field in it for clusterMap mapbox access
+  return `<strong><a href='/campgrounds/${this._id}'>${this.title}</a></strong>
+          <p>${this.description.substring(0, 25)}...</p>` //display the text in description 20 characters
+})
 
 //mongoose query middleware to delete all associated reviews when campground is deleted
 CampgroundSchema.post("findOneAndDelete", async function (doc) {
