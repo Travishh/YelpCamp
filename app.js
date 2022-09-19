@@ -1,6 +1,8 @@
 if(process.env.NODE_ENV !== "production"){ //if not in production, get the env variables
     require('dotenv').config();
 }
+
+
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -14,14 +16,18 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user");
 const mongoSanitize = require('express-mongo-sanitize');
+const MongoStore = require('connect-mongo');
 
 const usersRoute = require("./routes/users");
 const reviewRoute = require("./routes/reviews");
 const campgroundRoute = require("./routes/campground");
 
+// const dbUrl = process.env.DB_URL;
+const dbUrl = "mongodb://localhost:27017/yelp-camp";
 //connect to mongoDB
+
 mongoose
-  .connect("mongodb://localhost:27017/yelp-camp")
+  .connect(dbUrl)
   .then(() => {
     console.log("MONGODB CONNECTED!!!");
   })
@@ -39,6 +45,7 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')))
 
 const sessionConfig = {
+    store: MongoStore.create({mongoUrl: dbUrl}), //use mongo to store session rather than local storage
     secret: 'thisshouldbeabettersecret!',
     resave: false,
     saveUninitialized: true,
