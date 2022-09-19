@@ -22,8 +22,7 @@ const usersRoute = require("./routes/users");
 const reviewRoute = require("./routes/reviews");
 const campgroundRoute = require("./routes/campground");
 
-// const dbUrl = process.env.DB_URL;
-const dbUrl = "mongodb://localhost:27017/yelp-camp";
+const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/yelp-camp";
 //connect to mongoDB
 
 mongoose
@@ -44,9 +43,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')))
 
+const secret = process.env.SECRET || 'thisshouldnotbeasecret';
+
 const sessionConfig = {
     store: MongoStore.create({mongoUrl: dbUrl}), //use mongo to store session rather than local storage
-    secret: 'thisshouldbeabettersecret!',
+    secret: secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
