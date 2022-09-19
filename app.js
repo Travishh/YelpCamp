@@ -13,6 +13,7 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user");
+const mongoSanitize = require('express-mongo-sanitize');
 
 const usersRoute = require("./routes/users");
 const reviewRoute = require("./routes/reviews");
@@ -66,6 +67,7 @@ app.use((req, res, next) => {
     res.locals.error = req.flash('error');
     next();
 })
+app.use(mongoSanitize()); // prevent mongo injection
 
 //Use Routes
 app.use('/', usersRoute);
